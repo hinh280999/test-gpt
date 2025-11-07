@@ -4,8 +4,13 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:WorkTimeCalculator.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="340" d:DesignWidth="420">
+             d:DesignHeight="600" d:DesignWidth="500">
+    <UserControl.Resources>
+        <converters:BreakTimeConverter x:Key="BreakTimeConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </UserControl.Resources>
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -23,25 +28,100 @@
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Margin="0 24 0 0">
-            <TextBlock Text="Lunch break" FontSize="16" FontWeight="SemiBold" />
-            <StackPanel Orientation="Horizontal" Margin="0 16 0 0">
-                <materialDesign:TimePicker SelectedTime="{Binding LunchStart, Mode=TwoWay}"
-                                           Width="150"
-                                           Margin="0 0 12 0"
-                                           materialDesign:HintAssist.Hint="Lunch start" />
-                <materialDesign:TimePicker SelectedTime="{Binding LunchEnd, Mode=TwoWay}"
-                                           Width="150"
-                                           materialDesign:HintAssist.Hint="Lunch end" />
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0 24 0 0">
+            <StackPanel>
+                <!-- Work Duration -->
+                <TextBlock Text="Work Duration" 
+                           Style="{StaticResource H3Text}" 
+                           Margin="0,0,0,8" />
+                <TextBlock Text="How many hours do you work per day?" 
+                           Style="{StaticResource CaptionText}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,0,0,16" />
+                <Slider Value="{Binding WorkDurationHours, Mode=TwoWay}"
+                        Minimum="1"
+                        Maximum="12"
+                        TickFrequency="0.5"
+                        TickPlacement="BottomRight"
+                        Style="{StaticResource ModernSlider}"
+                        Margin="0,0,0,8" />
+                <Grid Margin="0,4,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="1h" 
+                               Style="{StaticResource CaptionText}"
+                               Grid.Column="0" />
+                    <TextBlock Text="{Binding WorkDurationHours, StringFormat='{}{0:F1}h'}" 
+                               Style="{StaticResource BodyText}"
+                               FontWeight="SemiBold"
+                               Grid.Column="1" />
+                    <TextBlock Text="12h" 
+                               Style="{StaticResource CaptionText}"
+                               Grid.Column="2"
+                               HorizontalAlignment="Right" />
+                </Grid>
+
+                <!-- Lunch Break Duration -->
+                <TextBlock Text="Lunch Break Duration" 
+                           Style="{StaticResource H3Text}" 
+                           Margin="0,16,0,8" />
+                <TextBlock Text="How long is your lunch break?" 
+                           Style="{StaticResource CaptionText}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,0,0,16" />
+                <UniformGrid Columns="4" Margin="0,0,0,16">
+                    <ToggleButton Content="15m"
+                                  Style="{StaticResource ToggleChipStyle}"
+                                  IsChecked="{Binding SelectedBreakMinutes, Converter={StaticResource BreakTimeConverter}, ConverterParameter=15}" />
+                    <ToggleButton Content="30m"
+                                  Style="{StaticResource ToggleChipStyle}"
+                                  IsChecked="{Binding SelectedBreakMinutes, Converter={StaticResource BreakTimeConverter}, ConverterParameter=30}" />
+                    <ToggleButton Content="1h"
+                                  Style="{StaticResource ToggleChipStyle}"
+                                  IsChecked="{Binding SelectedBreakMinutes, Converter={StaticResource BreakTimeConverter}, ConverterParameter=60}" />
+                    <ToggleButton Content="1.5h"
+                                  Style="{StaticResource ToggleChipStyle}"
+                                  IsChecked="{Binding SelectedBreakMinutes, Converter={StaticResource BreakTimeConverter}, ConverterParameter=90}" />
+                </UniformGrid>
+
+                <!-- Lunch Time Range -->
+                <TextBlock Text="Lunch Time Range" 
+                           Style="{StaticResource H3Text}" 
+                           Margin="0,16,0,8" />
+                <TextBlock Text="When do you usually take lunch?" 
+                           Style="{StaticResource CaptionText}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,0,0,16" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                    <materialDesign:TimePicker SelectedTime="{Binding LunchStart, Mode=TwoWay}"
+                                               Width="150"
+                                               Margin="0 0 12 0"
+                                               materialDesign:HintAssist.Hint="Lunch start" />
+                    <materialDesign:TimePicker SelectedTime="{Binding LunchEnd, Mode=TwoWay}"
+                                               Width="150"
+                                               materialDesign:HintAssist.Hint="Lunch end" />
+                </StackPanel>
+                
+                <TextBlock Text="{Binding ValidationMessage}" 
+                           Foreground="{StaticResource ErrorRedBrush}" 
+                           FontSize="12" 
+                           Margin="0,0,0,16"
+                           Visibility="{Binding ValidationMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+                <!-- Theme -->
+                <TextBlock Text="Theme" 
+                           Style="{StaticResource H3Text}" 
+                           Margin="0,16,0,8" />
+                <ToggleButton Style="{StaticResource AppSwitchToggleButtonStyle}"
+                              IsChecked="{Binding IsDarkTheme, Mode=TwoWay}"
+                              Margin="0,0,0,16">
+                    <TextBlock Text="Dark mode" />
+                </ToggleButton>
             </StackPanel>
-            <TextBlock Text="{Binding ValidationMessage}" Foreground="#D32F2F" FontSize="12" Margin="0 12 0 0" />
-            <TextBlock Text="Theme" FontSize="16" FontWeight="SemiBold" Margin="0 16 0 0" />
-            <ToggleButton Style="{StaticResource AppSwitchToggleButtonStyle}"
-                          IsChecked="{Binding IsDarkTheme, Mode=TwoWay}"
-                          Margin="0 16 0 0">
-                <TextBlock Text="Dark mode" />
-            </ToggleButton>
-        </StackPanel>
+        </ScrollViewer>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="0 24 0 0">

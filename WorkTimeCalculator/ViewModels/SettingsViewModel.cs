@@ -7,7 +7,7 @@ namespace WorkTimeCalculator.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
-    private readonly Action<LunchSettings> _saveCallback;
+    private readonly Action<LunchSettings, double, double> _saveCallback;
     private readonly Action _cancelCallback;
 
     [ObservableProperty]
@@ -22,11 +22,17 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _validationMessage = string.Empty;
 
-    public SettingsViewModel(LunchSettings source, Action<LunchSettings> saveCallback, Action cancelCallback)
+    [ObservableProperty]
+    private double _workDurationHours = 8.0;
+
+    [ObservableProperty]
+    private double _selectedBreakMinutes = 90;
+
+    public SettingsViewModel(LunchSettings source, double workDurationHours, double breakMinutes, Action<LunchSettings, double, double> saveCallback, Action cancelCallback)
     {
         _saveCallback = saveCallback;
         _cancelCallback = cancelCallback;
-        SetSource(source);
+        SetSource(source, workDurationHours, breakMinutes);
 
         SaveCommand = new RelayCommand(Save);
         CancelCommand = new RelayCommand(Cancel);
@@ -35,10 +41,12 @@ public partial class SettingsViewModel : ObservableObject
     public RelayCommand SaveCommand { get; }
     public RelayCommand CancelCommand { get; }
 
-    public void SetSource(LunchSettings source)
+    public void SetSource(LunchSettings source, double workDurationHours, double breakMinutes)
     {
         LunchStart = DateTime.Today.Add(source.Start);
         LunchEnd = DateTime.Today.Add(source.End);
+        WorkDurationHours = workDurationHours;
+        SelectedBreakMinutes = breakMinutes;
     }
 
     private void Save()
@@ -55,8 +63,14 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
+        if (WorkDurationHours < 1 || WorkDurationHours > 12)
+        {
+            ValidationMessage = "Work duration must be between 1 and 12 hours.";
+            return;
+        }
+
         ValidationMessage = string.Empty;
-        _saveCallback(new LunchSettings(LunchStart.Value.TimeOfDay, LunchEnd.Value.TimeOfDay));
+        _saveCallback(new LunchSettings(LunchStart.Value.TimeOfDay, LunchEnd.Value.TimeOfDay), WorkDurationHours, SelectedBreakMinutes);
     }
 
     private void Cancel()

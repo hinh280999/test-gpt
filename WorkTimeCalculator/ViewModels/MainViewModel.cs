@@ -24,6 +24,89 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private DateTime? _startTime = DateTime.Today.AddHours(8);
 
+    private string _startDateText = DateTime.Today.ToString("dd/MM/yyyy");
+    private string _startTimeText = DateTime.Today.AddHours(8).ToString("HH:mm");
+    private bool _isUpdatingFromDateTime = false;
+
+    public string StartDateText
+    {
+        get => _startDateText;
+        set
+        {
+            if (_startDateText != value)
+            {
+                _startDateText = value;
+                OnPropertyChanged();
+                if (!_isUpdatingFromDateTime)
+                {
+                    ParseDateTime();
+                }
+            }
+        }
+    }
+
+    public string StartTimeText
+    {
+        get => _startTimeText;
+        set
+        {
+            if (_startTimeText != value)
+            {
+                _startTimeText = value;
+                OnPropertyChanged();
+                if (!_isUpdatingFromDateTime)
+                {
+                    ParseDateTime();
+                }
+            }
+        }
+    }
+
+    private void ParseDateTime()
+    {
+        // Parse date
+        DateTime? parsedDate = null;
+        if (DateTime.TryParseExact(_startDateText, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out var date))
+        {
+            parsedDate = date;
+        }
+        else if (DateTime.TryParse(_startDateText, out date))
+        {
+            parsedDate = date;
+        }
+
+        // Parse time
+        TimeSpan? parsedTime = null;
+        if (TimeSpan.TryParse(_startTimeText, out var time))
+        {
+            parsedTime = time;
+        }
+        else if (DateTime.TryParseExact(_startTimeText, "HH:mm", null, System.Globalization.DateTimeStyles.None, out var timeOnly))
+        {
+            parsedTime = timeOnly.TimeOfDay;
+        }
+
+        // Update SelectedDate and StartTime
+        _isUpdatingFromDateTime = true;
+        try
+        {
+            if (parsedDate.HasValue)
+            {
+                SelectedDate = parsedDate.Value;
+            }
+
+            if (parsedTime.HasValue)
+            {
+                var dateToUse = parsedDate ?? SelectedDate;
+                StartTime = dateToUse.Date.Add(parsedTime.Value);
+            }
+        }
+        finally
+        {
+            _isUpdatingFromDateTime = false;
+        }
+    }
+
     [ObservableProperty]
     private DateTime? _actualEndTime;
 
@@ -57,18 +140,50 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isSettingsOpen;
 
+    [ObservableProperty]
+    private double _workDurationHours = 8.0;
+
+    [ObservableProperty]
+    private double _selectedBreakMinutes = 90;
+
+    [ObservableProperty]
+    private double _todayProgress = 0;
+
+    [ObservableProperty]
+    private double _todayTotalHours = 0;
+
+    [ObservableProperty]
+    private double _weeklyProgressPercent = 0;
+
+    [ObservableProperty]
+    private double _weeklyHours = 0;
+
+    [ObservableProperty]
+    private double _monthlyHours = 0;
+
+    [ObservableProperty]
+    private int _daysWorkedThisMonth = 0;
+
+    [ObservableProperty]
+    private string _timeRemaining = "0h 0m";
+
+    [ObservableProperty]
+    private bool _notifyBeforeEnd = false;
+
     public SettingsViewModel Settings { get; }
 
     public ICollectionView FilteredHistory { get; }
 
     public ObservableCollection<DailySummary> RecentSummaries { get; } = new();
 
+    public ObservableCollection<WorkEntry> TodayEntries { get; } = new();
+
     public LunchSettings LunchSettings { get; private set; }
 
     public MainViewModel()
     {
         LunchSettings = new LunchSettings(TimeSpan.FromHours(12), TimeSpan.FromHours(13.5));
-        Settings = new SettingsViewModel(LunchSettings, ApplySettings, CloseSettings);
+        Settings = new SettingsViewModel(LunchSettings, WorkDurationHours, SelectedBreakMinutes, ApplySettings, CloseSettings);
 
         FilteredHistory = CollectionViewSource.GetDefaultView(_history);
         FilteredHistory.Filter = FilterHistory;
@@ -82,6 +197,19 @@ public partial class MainViewModel : ObservableObject
         ExportCommand = new RelayCommand(ExportHistory, () => _history.Any());
         RefreshHistoryCommand = new RelayCommand(UpdateSummaries);
         OpenSettingsCommand = new RelayCommand(OpenSettings);
+        
+        // Set break time to match lunch duration
+        SelectedBreakMinutes = LunchSettings.Duration.TotalMinutes;
+        
+        // Initialize StartTime with SelectedDate
+        if (!StartTime.HasValue)
+        {
+            StartTime = SelectedDate.AddHours(8);
+        }
+        
+        // Initialize text fields
+        _startDateText = SelectedDate.ToString("dd/MM/yyyy");
+        _startTimeText = StartTime.Value.ToString("HH:mm");
     }
 
     public RelayCommand CalculateCommand { get; }
@@ -90,8 +218,40 @@ public partial class MainViewModel : ObservableObject
     public RelayCommand RefreshHistoryCommand { get; }
     public RelayCommand OpenSettingsCommand { get; }
 
+    partial void OnSelectedDateChanged(DateTime value)
+    {
+        // Update StartTime when SelectedDate changes - combine date with existing time
+        if (StartTime.HasValue)
+        {
+            var timeOfDay = StartTime.Value.TimeOfDay;
+            StartTime = value.Date.Add(timeOfDay);
+        }
+        else
+        {
+            StartTime = value.Date.AddHours(8);
+        }
+        
+        // Update text fields only if not updating from text input
+        if (!_isUpdatingFromDateTime)
+        {
+            _startDateText = value.ToString("dd/MM/yyyy");
+            OnPropertyChanged(nameof(StartDateText));
+        }
+        
+        CalculateCommand.NotifyCanExecuteChanged();
+        LogEntryCommand.NotifyCanExecuteChanged();
+        UpdateRecommendation();
+    }
+
     partial void OnStartTimeChanged(DateTime? value)
     {
+        // Update time text field only if not updating from text input
+        if (value.HasValue && !_isUpdatingFromDateTime)
+        {
+            _startTimeText = value.Value.ToString("HH:mm");
+            OnPropertyChanged(nameof(StartTimeText));
+        }
+        
         CalculateCommand.NotifyCanExecuteChanged();
         LogEntryCommand.NotifyCanExecuteChanged();
         UpdateRecommendation();
@@ -101,6 +261,21 @@ public partial class MainViewModel : ObservableObject
     {
         LogEntryCommand.NotifyCanExecuteChanged();
     }
+
+    partial void OnWorkDurationHoursChanged(double value)
+    {
+        UpdateRecommendation();
+        OnPropertyChanged(nameof(WorkDurationHoursDisplay));
+    }
+
+    partial void OnSelectedBreakMinutesChanged(double value)
+    {
+        UpdateRecommendation();
+    }
+
+    public string WorkDurationHoursDisplay => $"{WorkDurationHours:F1}h";
+
+    public string TodayProgressDisplay => $"{TodayTotalHours:F1}h / {WorkDurationHours:F1}h";
 
     partial void OnHistoryFilterChanged(string value)
     {
@@ -133,11 +308,56 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var calculated = _calculator.CalculateEnd(SelectedDate, StartTime.Value.TimeOfDay, LunchSettings);
+        var breakDuration = TimeSpan.FromMinutes(SelectedBreakMinutes);
+        var workDuration = TimeSpan.FromHours(WorkDurationHours);
+        
+        // Use StartTime directly if it has a valid date, otherwise combine with SelectedDate
+        var start = StartTime.Value.Date == DateTime.Today || StartTime.Value.Date == SelectedDate
+            ? StartTime.Value
+            : SelectedDate.Date.Add(StartTime.Value.TimeOfDay);
+        var lunchStart = start.Date.Add(LunchSettings.Start);
+        var lunchEnd = start.Date.Add(LunchSettings.End);
+
+        DateTime calculated;
+        
+        // If start time is after lunch, skip lunch break
+        if (start >= lunchEnd)
+        {
+            calculated = start.Add(workDuration);
+        }
+        else
+        {
+            // Calculate with lunch break
+            var adjusted = start.Add(workDuration);
+            if (start <= lunchStart)
+            {
+                adjusted = adjusted.Add(breakDuration);
+            }
+            else if (start < lunchEnd)
+            {
+                var remainingLunch = lunchEnd - start;
+                adjusted = adjusted.Add(remainingLunch > breakDuration ? breakDuration : remainingLunch);
+            }
+            calculated = adjusted;
+        }
+
         RecommendedEndTimeDisplay = calculated.ToString("t");
-        RecommendationDetails = $"8 hours focus + {LunchSettings.Duration.TotalMinutes / 60:0.##} h lunch";
-        NextNotificationDisplay = $"Be ready to leave at {calculated.AddMinutes(-15):t}";
-        ReminderProgress = 25;
+        RecommendationDetails = $"{WorkDurationHours:F1} hours work + {SelectedBreakMinutes / 60:0.##} h break";
+        NextNotificationDisplay = NotifyBeforeEnd ? $"Notify at {calculated.AddMinutes(-15):t}" : "No reminder scheduled";
+        
+        // Calculate time remaining
+        var now = DateTime.Now;
+        if (calculated > now)
+        {
+            var remaining = calculated - now;
+            TimeRemaining = $"{(int)remaining.TotalHours}h {remaining.Minutes}m";
+            TodayProgress = Math.Min(100, (now - start).TotalHours / WorkDurationHours * 100);
+        }
+        else
+        {
+            TimeRemaining = "0h 0m";
+            TodayProgress = 100;
+        }
     }
 
     private bool CanCalculate() => StartTime.HasValue;
@@ -184,12 +404,12 @@ public partial class MainViewModel : ObservableObject
         {
             RecommendedEndTimeDisplay = "--:--";
             RecommendationDetails = "Enter a start time to see your finish.";
+            TimeRemaining = "0h 0m";
+            TodayProgress = 0;
             return;
         }
 
-        var calculated = _calculator.CalculateEnd(SelectedDate, StartTime.Value.TimeOfDay, LunchSettings);
-        RecommendedEndTimeDisplay = calculated.ToString("t");
-        RecommendationDetails = $"8 hours work + {LunchSettings.Duration.TotalMinutes / 60:0.##} h lunch";
+        Calculate();
     }
 
     private void UpdateSummaries()
@@ -201,19 +421,29 @@ public partial class MainViewModel : ObservableObject
             WeeklySummary = "0 h";
             MonthlySummary = "0 h";
             OvertimeSummary = "On track";
+            WeeklyHours = 0;
+            MonthlyHours = 0;
+            WeeklyProgressPercent = 0;
+            DaysWorkedThisMonth = 0;
             return;
         }
 
         var today = DateTime.Today;
         var startOfWeek = today.AddDays(-(int)today.DayOfWeek);
         var weeklyHours = _history.Where(h => h.Date >= startOfWeek).Sum(h => h.TotalHours);
+        WeeklyHours = weeklyHours;
         WeeklySummary = $"{weeklyHours:F1} h";
 
         var startOfMonth = new DateTime(today.Year, today.Month, 1);
         var monthlyHours = _history.Where(h => h.Date >= startOfMonth).Sum(h => h.TotalHours);
+        MonthlyHours = monthlyHours;
         MonthlySummary = $"{monthlyHours:F1} h";
+        
+        DaysWorkedThisMonth = _history.Where(h => h.Date >= startOfMonth).Select(h => h.Date).Distinct().Count();
 
         var expectedWeekly = 40;
+        WeeklyProgressPercent = Math.Min(100, (weeklyHours / expectedWeekly) * 100);
+        
         var overtime = weeklyHours - expectedWeekly;
         OvertimeSummary = overtime switch
         {
@@ -221,7 +451,23 @@ public partial class MainViewModel : ObservableObject
             < 0 => $"{overtime:F1} h behind",
             _ => "On track"
         };
+        
+        // Update today's entries
+        UpdateTodayEntries();
         UpdateRecentSummaries();
+    }
+
+    private void UpdateTodayEntries()
+    {
+        TodayEntries.Clear();
+        var todayEntries = _history.Where(h => h.Date.Date == DateTime.Today).OrderBy(h => h.StartTime);
+        foreach (var entry in todayEntries)
+        {
+            TodayEntries.Add(entry);
+        }
+        
+        TodayTotalHours = TodayEntries.Sum(e => e.TotalHours);
+        TodayProgress = WorkDurationHours > 0 ? Math.Min(100, (TodayTotalHours / WorkDurationHours) * 100) : 0;
     }
 
     private void UpdateRecentSummaries()
@@ -257,11 +503,13 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private void ApplySettings(LunchSettings settings)
+    private void ApplySettings(LunchSettings settings, double workDurationHours, double breakMinutes)
     {
         LunchSettings = settings;
+        WorkDurationHours = workDurationHours;
+        SelectedBreakMinutes = breakMinutes;
         UpdateRecommendation();
-        Settings.SetSource(settings);
+        Settings.SetSource(settings, WorkDurationHours, SelectedBreakMinutes);
         IsSettingsOpen = false;
     }
 
@@ -272,7 +520,7 @@ public partial class MainViewModel : ObservableObject
 
     private void OpenSettings()
     {
-        Settings.SetSource(LunchSettings);
+        Settings.SetSource(LunchSettings, WorkDurationHours, SelectedBreakMinutes);
         IsSettingsOpen = true;
     }
 }
