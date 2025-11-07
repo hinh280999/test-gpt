@@ -38,6 +38,18 @@
                 <Setter Property="Cursor" Value="Hand" />
             </Style>
 
+            <Style TargetType="Button" x:Key="MaterialDesignOutlinedButton" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="10 6" />
+                <Setter Property="Margin" Value="0 0 0 0" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppPrimaryBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="materialDesign:RippleAssist.IsCentered" Value="True" />
+            </Style>
+
             <!-- Cards -->
             <Style TargetType="Border" x:Key="CardStyle">
                 <Setter Property="Background" Value="{StaticResource AppCardBackground}" />
