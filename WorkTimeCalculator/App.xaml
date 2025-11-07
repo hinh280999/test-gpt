@@ -38,7 +38,7 @@
                 <Setter Property="Cursor" Value="Hand" />
             </Style>
 
-            <Style TargetType="Button" x:Key="MaterialDesignOutlinedButton" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Style TargetType="Button" x:Key="AppOutlinedButtonStyle" BasedOn="{StaticResource MaterialDesignFlatButton}">
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Padding" Value="10 6" />
                 <Setter Property="Margin" Value="0 0 0 0" />

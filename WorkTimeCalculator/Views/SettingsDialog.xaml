@@ -45,7 +45,7 @@
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="0 24 0 0">
-            <Button Content="Cancel" Style="{StaticResource MaterialDesignOutlinedButton}"
+            <Button Content="Cancel" Style="{StaticResource AppOutlinedButtonStyle}"
                     Command="{Binding CancelCommand}" Margin="0 0 12 0" />
             <Button Content="Save" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding SaveCommand}" />
         </StackPanel>
