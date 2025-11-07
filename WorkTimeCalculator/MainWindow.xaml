@@ -4,6 +4,7 @@
                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                           xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
                            xmlns:local="clr-namespace:WorkTimeCalculator"
                            xmlns:viewModels="clr-namespace:WorkTimeCalculator.ViewModels"
                            xmlns:views="clr-namespace:WorkTimeCalculator.Views"
@@ -139,29 +140,15 @@
                         <TextBlock Text="{Binding OvertimeSummary}" Foreground="#E65100" />
                     </StackPanel>
                 </StackPanel>
-                                    <Separator Margin="0 16 0 12" />
-                                    <TextBlock Text="Recent daily totals" FontSize="14" FontWeight="SemiBold" />
-                                    <ItemsControl ItemsSource="{Binding RecentSummaries}" Margin="0 8 0 0">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#F5F5F5" CornerRadius="6" Padding="12" Margin="0 4 0 4">
-                                                    <DockPanel>
-                                                        <TextBlock Text="{Binding DateLabel}" FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding HoursDisplay}" Foreground="#1E88E5" DockPanel.Dock="Right" FontWeight="SemiBold" />
-                                                    </DockPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                        <ItemsControl.Style>
-                                            <Style TargetType="ItemsControl">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RecentSummaries.Count}" Value="0">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ItemsControl.Style>
-                                    </ItemsControl>
+                                    <!-- Simple chart placeholder using LiveCharts -->
+                                    <lvc:CartesianChart Series="{Binding WeeklySeries}" Margin="0 16 0 0" Height="180">
+                                        <lvc:CartesianChart.AxisX>
+                                            <lvc:Axis Labels="{Binding WeeklyLabels}" />
+                                        </lvc:CartesianChart.AxisX>
+                                        <lvc:CartesianChart.AxisY>
+                                            <lvc:Axis Labeler="{Binding HoursLabelFormatter}" />
+                                        </lvc:CartesianChart.AxisY>
+                                    </lvc:CartesianChart>
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource CardStyle}" Background="#E3F2FD">
