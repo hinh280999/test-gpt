@@ -1,1 +1,93 @@
-a
+# Visual Studio cache and settings
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]uild[Ll]og.*
+
+# Generated files
+Generated\ Files/
+_TestResults/
+[Tt]est[Rr]esult*/
+*.VisualState.xml
+*.vsp
+*.vspscc
+
+# Coverage
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+.nuget/
+
+# Package directories
+packages/
+**/packages/*
+!**/packages/build/
+!**/packages/repositories.config
+
+# IDEs and tooling
+.idea/
+*.sln.iml
+_ReSharper*/
+*.[Rr]e[Ss]harper
+.jetbrains/
+.vscode/
+*.psess
+*.vspx
+*.sap
+
+# Publish output
+app.publish/
+[Pp]ublishProfiles/
+*.Publish.xml
+
+# Database files
+*.mdf
+*.ldf
+*.ndf
+*.dbmdl
+*.dbproj.schemaview
+
+# Miscellaneous
+*.pdb
+*.mdb
+*.opendb
+*.cache
+*.log
+*.dmp
+*.tmp
+*.bak
+*.orig
+*.swp
+*.tmp_proj
+*.tlog
+*.pidb
+*.svclog
+
+# Operating system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+*.lnk
