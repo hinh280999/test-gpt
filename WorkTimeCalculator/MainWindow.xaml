@@ -37,25 +37,26 @@
 
         <!-- Top bar -->
         <DockPanel Grid.Row="0" Margin="0 0 0 24">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" materialDesign:StackPanelAssist.Spacing="12">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                 <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Command="{Binding OpenSettingsCommand}">
-                    <StackPanel Orientation="Horizontal" materialDesign:StackPanelAssist.Spacing="8">
-                        <materialDesign:PackIcon Kind="Cog" />
+                        Command="{Binding OpenSettingsCommand}"
+                        Margin="0 0 12 0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Cog" Margin="0 0 8 0" />
                         <TextBlock Text="Settings" />
                     </StackPanel>
                 </Button>
                 <Button Style="{StaticResource MaterialDesignOutlinedButton}"
                         Command="{Binding ExportCommand}" ToolTip="Export history to CSV (Ctrl+E)">
-                    <StackPanel Orientation="Horizontal" materialDesign:StackPanelAssist.Spacing="8">
-                        <materialDesign:PackIcon Kind="FileExport" />
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FileExport" Margin="0 0 8 0" />
                         <TextBlock Text="Export" />
                     </StackPanel>
                 </Button>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" materialDesign:StackPanelAssist.Spacing="12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <materialDesign:PackIcon Kind="ClockOutline" Width="32" Height="32"
-                                         Foreground="{StaticResource AppPrimaryBrush}" />
+                                         Foreground="{StaticResource AppPrimaryBrush}" Margin="0 0 12 0" />
                 <StackPanel>
                     <TextBlock Text="Work Time Calculator" Style="{StaticResource HeadlineText}" />
                     <TextBlock Text="Plan your day and leave right on time" FontSize="14" Foreground="#607D8B" />
@@ -123,19 +124,16 @@
                                 <StackPanel>
                                     <TextBlock Text="Summary" FontSize="16" FontWeight="SemiBold" />
                                     <StackPanel Orientation="Vertical" Margin="0 12 0 0">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
-                                                    materialDesign:StackPanelAssist.Spacing="12">
-                                            <TextBlock Text="This Week" FontWeight="SemiBold" Width="120" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4">
+                                            <TextBlock Text="This Week" FontWeight="SemiBold" Width="120" Margin="0 0 12 0" />
                                             <TextBlock Text="{Binding WeeklySummary}" />
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
-                                                    materialDesign:StackPanelAssist.Spacing="12">
-                                            <TextBlock Text="This Month" FontWeight="SemiBold" Width="120" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4">
+                                            <TextBlock Text="This Month" FontWeight="SemiBold" Width="120" Margin="0 0 12 0" />
                                             <TextBlock Text="{Binding MonthlySummary}" />
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
-                                                    materialDesign:StackPanelAssist.Spacing="12">
-                                            <TextBlock Text="Overtime" FontWeight="SemiBold" Width="120" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4">
+                                            <TextBlock Text="Overtime" FontWeight="SemiBold" Width="120" Margin="0 0 12 0" />
                                             <TextBlock Text="{Binding OvertimeSummary}" Foreground="#E65100" />
                                         </StackPanel>
                                     </StackPanel>
@@ -181,10 +179,9 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal" Margin="0 0 0 12"
-                                materialDesign:StackPanelAssist.Spacing="12">
+                    <StackPanel Orientation="Horizontal" Margin="0 0 0 12">
                         <TextBox Width="220" Text="{Binding HistoryFilter, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:HintAssist.Hint="Search history" />
+                                 materialDesign:HintAssist.Hint="Search history" Margin="0 0 12 0" />
                         <Button Content="Refresh" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding RefreshHistoryCommand}" />
                     </StackPanel>
 
