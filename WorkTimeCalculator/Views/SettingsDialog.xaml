@@ -1,0 +1,49 @@
+<UserControl x:Class="WorkTimeCalculator.Views.SettingsDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="340" d:DesignWidth="420">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" materialDesign:StackPanelAssist.Spacing="12">
+            <materialDesign:PackIcon Kind="CogOutline" Width="28" Height="28" Foreground="{StaticResource AppPrimaryBrush}" />
+            <StackPanel>
+                <TextBlock Text="Settings" FontSize="20" FontWeight="SemiBold" />
+                <TextBlock Text="Customize your workday" FontSize="14" Foreground="#607D8B" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Margin="0 24 0 0" materialDesign:StackPanelAssist.Spacing="16">
+            <TextBlock Text="Lunch break" FontSize="16" FontWeight="SemiBold" />
+            <StackPanel Orientation="Horizontal" materialDesign:StackPanelAssist.Spacing="12">
+                <materialDesign:TimePicker SelectedTime="{Binding LunchStart, Mode=TwoWay}"
+                                           Width="150"
+                                           materialDesign:HintAssist.Hint="Lunch start" />
+                <materialDesign:TimePicker SelectedTime="{Binding LunchEnd, Mode=TwoWay}"
+                                           Width="150"
+                                           materialDesign:HintAssist.Hint="Lunch end" />
+            </StackPanel>
+            <TextBlock Text="{Binding ValidationMessage}" Foreground="#D32F2F" FontSize="12" />
+            <TextBlock Text="Theme" FontSize="16" FontWeight="SemiBold" />
+            <ToggleButton Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                          IsChecked="{Binding IsDarkTheme, Mode=TwoWay}">
+                <TextBlock Text="Dark mode" Margin="12 0 0 0" />
+            </ToggleButton>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                    materialDesign:StackPanelAssist.Spacing="12" Margin="0 24 0 0">
+            <Button Content="Cancel" Style="{StaticResource MaterialDesignFlatButton}"
+                    Command="{Binding CancelCommand}" />
+            <Button Content="Save" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding SaveCommand}" />
+        </StackPanel>
+    </Grid>
+</UserControl>
