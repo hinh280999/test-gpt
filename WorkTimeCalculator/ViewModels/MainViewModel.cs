@@ -6,8 +6,6 @@ using System.Linq;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
 using WorkTimeCalculator.Models;
 using WorkTimeCalculator.Services;
 
@@ -63,11 +61,7 @@ public partial class MainViewModel : ObservableObject
 
     public ICollectionView FilteredHistory { get; }
 
-    public ObservableCollection<ISeries> WeeklySeries { get; } = new();
-
-    public string[] WeeklyLabels { get; private set; } = Array.Empty<string>();
-
-    public Func<double, string> HoursLabelFormatter { get; }
+    public ObservableCollection<DailySummary> RecentSummaries { get; } = new();
 
     public LunchSettings LunchSettings { get; private set; }
 
@@ -79,10 +73,7 @@ public partial class MainViewModel : ObservableObject
         FilteredHistory = CollectionViewSource.GetDefaultView(_history);
         FilteredHistory.Filter = FilterHistory;
 
-        HoursLabelFormatter = value => $"{value:F1} h";
-
         SeedDemoHistory();
-        BuildWeeklyChart();
         UpdateSummaries();
         UpdateRecommendation();
 
@@ -203,6 +194,8 @@ public partial class MainViewModel : ObservableObject
 
     private void UpdateSummaries()
     {
+        RecentSummaries.Clear();
+
         if (_history.Count == 0)
         {
             WeeklySummary = "0 h";
@@ -228,37 +221,21 @@ public partial class MainViewModel : ObservableObject
             < 0 => $"{overtime:F1} h behind",
             _ => "On track"
         };
-
-        BuildWeeklyChart();
+        UpdateRecentSummaries();
     }
 
-    private void BuildWeeklyChart()
+    private void UpdateRecentSummaries()
     {
-        WeeklySeries.Clear();
-        var weekGroups = _history
+        var recentSummaries = _history
             .GroupBy(h => h.Date.Date)
-            .OrderBy(g => g.Key)
-            .TakeLast(7)
-            .ToArray();
+            .OrderByDescending(g => g.Key)
+            .Take(7)
+            .Select(g => new DailySummary(g.Key, Math.Round(g.Sum(h => h.TotalHours), 2)));
 
-        if (weekGroups.Length == 0)
+        foreach (var summary in recentSummaries)
         {
-            WeeklyLabels = Array.Empty<string>();
-            WeeklySeries.Add(new ColumnSeries<double> { Values = new double[] { 0 } });
-            return;
+            RecentSummaries.Add(summary);
         }
-
-        WeeklyLabels = weekGroups.Select(g => g.Key.ToString("ddd"))
-            .ToArray();
-        var values = weekGroups.Select(g => Math.Round(g.Sum(h => h.TotalHours), 2)).ToArray();
-        WeeklySeries.Add(new ColumnSeries<double>
-        {
-            Values = values,
-            Fill = LiveChartsCore.SkiaSharpView.PaintExtensions.LinearGradient(
-                new(0, 0), new(0, 1),
-                (0, SkiaSharp.SKColors.DeepSkyBlue),
-                (1, SkiaSharp.SKColors.LightBlue))
-        });
     }
 
     private void SeedDemoHistory()
@@ -298,4 +275,11 @@ public partial class MainViewModel : ObservableObject
         Settings.SetSource(LunchSettings);
         IsSettingsOpen = true;
     }
+}
+
+public record DailySummary(DateTime Date, double TotalHours)
+{
+    public string DateDisplay => Date.ToString("ddd, MMM d");
+
+    public string TotalHoursDisplay => $"{TotalHours:F1} h";
 }

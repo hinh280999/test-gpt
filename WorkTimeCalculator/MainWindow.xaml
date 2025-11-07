@@ -4,7 +4,6 @@
                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-                           xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
                            xmlns:local="clr-namespace:WorkTimeCalculator"
                            xmlns:viewModels="clr-namespace:WorkTimeCalculator.ViewModels"
                            xmlns:views="clr-namespace:WorkTimeCalculator.Views"
@@ -124,31 +123,44 @@
                                 <StackPanel>
                                     <TextBlock Text="Summary" FontSize="16" FontWeight="SemiBold" />
                                     <StackPanel Orientation="Vertical" Margin="0 12 0 0">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
-                                materialDesign:StackPanelAssist.Spacing="12">
-                        <TextBlock Text="This Week" FontWeight="SemiBold" Width="120" />
-                        <TextBlock Text="{Binding WeeklySummary}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
-                                materialDesign:StackPanelAssist.Spacing="12">
-                        <TextBlock Text="This Month" FontWeight="SemiBold" Width="120" />
-                        <TextBlock Text="{Binding MonthlySummary}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
-                                materialDesign:StackPanelAssist.Spacing="12">
-                        <TextBlock Text="Overtime" FontWeight="SemiBold" Width="120" />
-                        <TextBlock Text="{Binding OvertimeSummary}" Foreground="#E65100" />
-                    </StackPanel>
-                </StackPanel>
-                                    <!-- Simple chart placeholder using LiveCharts -->
-                                    <lvc:CartesianChart Series="{Binding WeeklySeries}" Margin="0 16 0 0" Height="180">
-                                        <lvc:CartesianChart.AxisX>
-                                            <lvc:Axis Labels="{Binding WeeklyLabels}" />
-                                        </lvc:CartesianChart.AxisX>
-                                        <lvc:CartesianChart.AxisY>
-                                            <lvc:Axis Labeler="{Binding HoursLabelFormatter}" />
-                                        </lvc:CartesianChart.AxisY>
-                                    </lvc:CartesianChart>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
+                                                    materialDesign:StackPanelAssist.Spacing="12">
+                                            <TextBlock Text="This Week" FontWeight="SemiBold" Width="120" />
+                                            <TextBlock Text="{Binding WeeklySummary}" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
+                                                    materialDesign:StackPanelAssist.Spacing="12">
+                                            <TextBlock Text="This Month" FontWeight="SemiBold" Width="120" />
+                                            <TextBlock Text="{Binding MonthlySummary}" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
+                                                    materialDesign:StackPanelAssist.Spacing="12">
+                                            <TextBlock Text="Overtime" FontWeight="SemiBold" Width="120" />
+                                            <TextBlock Text="{Binding OvertimeSummary}" Foreground="#E65100" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <TextBlock Text="Recent daily totals" FontSize="14" FontWeight="SemiBold" Margin="0 16 0 8" />
+                                    <ItemsControl ItemsSource="{Binding RecentSummaries}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#F5F5F5" CornerRadius="8" Padding="12" Margin="0 4 0 4">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding DateDisplay}" Foreground="#546E7A" />
+                                                        <TextBlock Text="{Binding TotalHoursDisplay}" Grid.Column="1" FontWeight="SemiBold" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource CardStyle}" Background="#E3F2FD">
