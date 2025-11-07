@@ -35,7 +35,6 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="64" />
-                <RowDefinition Height="48" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -89,42 +88,9 @@
             </Border>
 
             <!-- ========================================== -->
-            <!-- NAVIGATION TABS -->
-            <!-- ========================================== -->
-            <Border Grid.Row="1" 
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="0,0,0,1">
-                <TabControl SelectedIndex="{Binding SelectedTabIndex}"
-                            Style="{StaticResource ModernTabControl}"
-                            BorderThickness="0">
-                    <TabItem Style="{StaticResource NavigationTabStyle}">
-                        <TabItem.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="CalendarToday" Width="16" Height="16" 
-                                                         Margin="0,0,8,0"
-                                                         VerticalAlignment="Center" />
-                                <TextBlock Text="Today" />
-                            </StackPanel>
-                        </TabItem.Header>
-                    </TabItem>
-                    <TabItem Style="{StaticResource NavigationTabStyle}">
-                        <TabItem.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="History" Width="16" Height="16" 
-                                                         Margin="0,0,8,0"
-                                                         VerticalAlignment="Center" />
-                                <TextBlock Text="History" />
-                            </StackPanel>
-                        </TabItem.Header>
-                    </TabItem>
-                </TabControl>
-            </Border>
-
-            <!-- ========================================== -->
             <!-- MAIN CONTENT AREA -->
             <!-- ========================================== -->
-            <Grid Grid.Row="2" Margin="24">
+            <Grid Grid.Row="1" Margin="24">
                 <TabControl SelectedIndex="{Binding SelectedTabIndex}"
                             Style="{StaticResource ModernTabControl}"
                             BorderThickness="0">
@@ -133,7 +99,7 @@
                     <!-- TODAY TAB -->
                     <!-- ========================================== -->
                     <TabItem>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                        <ScrollViewer VerticalScrollBarVisibility="Hidden" 
                                       HorizontalScrollBarVisibility="Disabled"
                                       Padding="0,16,0,0">
                             <Grid>
@@ -150,75 +116,91 @@
                                     <Border Style="{StaticResource CardStyle}">
                                         <StackPanel>
                                             <!-- Card Header -->
-                                            <Grid Margin="0,0,0,16">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0">
-                                                    <materialDesign:PackIcon Kind="Calculator" 
-                                                                             Width="24" 
-                                                                             Height="24"
-                                                                             Foreground="{StaticResource PrimaryBlueBrush}"
-                                                                             Margin="0,0,12,0"
-                                                                             VerticalAlignment="Center" />
-                                                    <TextBlock Text="Calculate Your End Time" 
-                                                               Style="{StaticResource H2Text}" />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Grid.Column="2" VerticalAlignment="Center">
-                                                    <Button Style="{StaticResource TextButtonStyle}"
-                                                            Padding="8,4"
-                                                            Margin="0,0,4,0"
-                                                            Click="SetToday_Click">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <materialDesign:PackIcon Kind="CalendarToday" 
-                                                                                     Width="14" 
-                                                                                     Height="14"
-                                                                                     Margin="0,0,4,0" />
-                                                            <TextBlock Text="Today" FontSize="12" />
-                                                        </StackPanel>
-                                                    </Button>
-                                                    <Button Style="{StaticResource TextButtonStyle}"
-                                                            Padding="8,4"
-                                                            Click="SetNow_Click">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <materialDesign:PackIcon Kind="ClockOutline" 
-                                                                                     Width="14" 
-                                                                                     Height="14"
-                                                                                     Margin="0,0,4,0" />
-                                                            <TextBlock Text="Now" FontSize="12" />
-                                                        </StackPanel>
-                                                    </Button>
-                                                </StackPanel>
-                                            </Grid>
+                                            <StackPanel Orientation="Horizontal" 
+                                                        Margin="0,0,0,16"
+                                                        VerticalAlignment="Center">
+                                                <materialDesign:PackIcon Kind="ClockOutline" 
+                                                                         Width="24" 
+                                                                         Height="24"
+                                                                         Foreground="{StaticResource PrimaryBlueBrush}"
+                                                                         Margin="0,0,12,0"
+                                                                         VerticalAlignment="Center" />
+                                                <TextBlock Text="Calculate Your End Time" 
+                                                           Style="{StaticResource H2Text}"
+                                                           VerticalAlignment="Center" />
+                                            </StackPanel>
 
-                                            <!-- Start Date and Time -->
-                                            <TextBlock Text="Start Date and Time" 
+                                            <!-- Start Time -->
+                                            <TextBlock Text="Start Time" 
                                                        Style="{StaticResource BodyText}"
                                                        FontWeight="Medium"
                                                        Margin="0,0,0,8" />
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="8" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0"
-                                                         Text="{Binding StartDateText, UpdateSourceTrigger=PropertyChanged}"
-                                                         materialDesign:HintAssist.Hint="Date (dd/MM/yyyy)" />
-                                                <TextBox Grid.Column="2"
-                                                         Text="{Binding StartTimeText, UpdateSourceTrigger=PropertyChanged}"
-                                                         materialDesign:HintAssist.Hint="Time (HH:mm)" />
-                                            </Grid>
+                                            <TextBox x:Name="StartTimeTextBox"
+                                                     Text="{Binding StartDateTimeText, UpdateSourceTrigger=PropertyChanged}"
+                                                     materialDesign:HintAssist.Hint="Time (e.g., 8:00 AM or dd/MM/yyyy 8:00 AM)"
+                                                     Margin="0,0,0,12" />
 
-                                            <!-- Calculate Button -->
-                                            <Button Content="Calculate" 
-                                                    Style="{StaticResource PrimaryButtonStyle}"
-                                                    Command="{Binding CalculateCommand}"
-                                                    HorizontalAlignment="Stretch"
-                                                    Margin="0,24,0,0"
-                                                    ToolTip="Calculate end time (Enter)" />
+                                            <!-- Quick Action Buttons -->
+                                            <StackPanel Orientation="Horizontal"
+                                                        HorizontalAlignment="Left"
+                                                        Margin="0,0,0,24">
+                                                <Button Style="{StaticResource QuickActionButtonStyle}"
+                                                        Margin="0,0,8,0"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        Click="SetToday_Click">
+                                                    <StackPanel Orientation="Horizontal" 
+                                                                VerticalAlignment="Center">
+                                                        <materialDesign:PackIcon Kind="CalendarToday" 
+                                                                                 Width="16" 
+                                                                                 Height="16"
+                                                                                 Margin="0,0,6,0"
+                                                                                 VerticalAlignment="Center"
+                                                                                 Foreground="White" />
+                                                        <TextBlock Text="Today" 
+                                                                   FontSize="13"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="White" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Style="{StaticResource QuickActionButtonStyle}"
+                                                        Margin="0,0,8,0"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        Click="SetNow_Click">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                VerticalAlignment="Center">
+                                                        <materialDesign:PackIcon Kind="Alarm" 
+                                                                                 Width="16" 
+                                                                                 Height="16"
+                                                                                 Margin="0,0,6,0"
+                                                                                 VerticalAlignment="Center"
+                                                                                 Foreground="White" />
+                                                        <TextBlock Text="Now" 
+                                                                   FontSize="13"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="White" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Style="{StaticResource QuickActionButtonStyle}"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        Click="SetCustom_Click">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                VerticalAlignment="Center">
+                                                        <materialDesign:PackIcon Kind="Cog" 
+                                                                                 Width="16" 
+                                                                                 Height="16"
+                                                                                 Margin="0,0,6,0"
+                                                                                 VerticalAlignment="Center"
+                                                                                 Foreground="White" />
+                                                        <TextBlock Text="Custom" 
+                                                                   FontSize="13"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="White" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
 
                                             <!-- Recommended End Time Display -->
                                             <Border Background="#E8F5E9" 

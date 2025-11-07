@@ -26,6 +26,7 @@ public partial class MainViewModel : ObservableObject
 
     private string _startDateText = DateTime.Today.ToString("dd/MM/yyyy");
     private string _startTimeText = DateTime.Today.AddHours(8).ToString("HH:mm");
+    private string _startDateTimeText = $"{DateTime.Today:dd/MM/yyyy} {DateTime.Today.AddHours(8):HH:mm}";
     private bool _isUpdatingFromDateTime = false;
 
     public string StartDateText
@@ -37,6 +38,7 @@ public partial class MainViewModel : ObservableObject
             {
                 _startDateText = value;
                 OnPropertyChanged();
+                UpdateStartDateTimeText();
                 if (!_isUpdatingFromDateTime)
                 {
                     ParseDateTime();
@@ -54,10 +56,150 @@ public partial class MainViewModel : ObservableObject
             {
                 _startTimeText = value;
                 OnPropertyChanged();
+                UpdateStartDateTimeText();
                 if (!_isUpdatingFromDateTime)
                 {
                     ParseDateTime();
                 }
+            }
+        }
+    }
+
+    public string StartDateTimeText
+    {
+        get => _startDateTimeText;
+        set
+        {
+            if (_startDateTimeText != value)
+            {
+                _startDateTimeText = value;
+                OnPropertyChanged();
+                if (!_isUpdatingFromDateTime)
+                {
+                    ParseStartDateTimeText();
+                }
+            }
+        }
+    }
+
+    private void UpdateStartDateTimeText()
+    {
+        if (StartTime.HasValue)
+        {
+            var dateTime = StartTime.Value;
+            if (dateTime.Date == DateTime.Today)
+            {
+                _startDateTimeText = dateTime.ToString("h:mm tt");
+            }
+            else
+            {
+                _startDateTimeText = $"{dateTime:dd/MM/yyyy} {dateTime:h:mm tt}";
+            }
+            OnPropertyChanged(nameof(StartDateTimeText));
+        }
+    }
+
+    private void ParseStartDateTimeText()
+    {
+        if (string.IsNullOrWhiteSpace(_startDateTimeText))
+        {
+            return;
+        }
+
+        // Try to parse as full datetime first (dd/MM/yyyy HH:mm or dd/MM/yyyy h:mm tt)
+        if (DateTime.TryParseExact(_startDateTimeText, "dd/MM/yyyy HH:mm", null, System.Globalization.DateTimeStyles.None, out var fullDate))
+        {
+            _isUpdatingFromDateTime = true;
+            try
+            {
+                SelectedDate = fullDate.Date;
+                StartTime = fullDate;
+                _startDateText = fullDate.ToString("dd/MM/yyyy");
+                _startTimeText = fullDate.ToString("HH:mm");
+                OnPropertyChanged(nameof(StartDateText));
+                OnPropertyChanged(nameof(StartTimeText));
+            }
+            finally
+            {
+                _isUpdatingFromDateTime = false;
+            }
+            return;
+        }
+
+        // Try to parse as date with 12-hour format
+        if (DateTime.TryParseExact(_startDateTimeText, "dd/MM/yyyy h:mm tt", null, System.Globalization.DateTimeStyles.None, out fullDate))
+        {
+            _isUpdatingFromDateTime = true;
+            try
+            {
+                SelectedDate = fullDate.Date;
+                StartTime = fullDate;
+                _startDateText = fullDate.ToString("dd/MM/yyyy");
+                _startTimeText = fullDate.ToString("HH:mm");
+                OnPropertyChanged(nameof(StartDateText));
+                OnPropertyChanged(nameof(StartTimeText));
+            }
+            finally
+            {
+                _isUpdatingFromDateTime = false;
+            }
+            return;
+        }
+
+        // Try to parse as time only (HH:mm or h:mm tt) - use today's date
+        if (DateTime.TryParseExact(_startDateTimeText, "HH:mm", null, System.Globalization.DateTimeStyles.None, out var timeOnly))
+        {
+            _isUpdatingFromDateTime = true;
+            try
+            {
+                StartTime = SelectedDate.Date.Add(timeOnly.TimeOfDay);
+                _startTimeText = timeOnly.ToString("HH:mm");
+                _startDateText = SelectedDate.ToString("dd/MM/yyyy");
+                OnPropertyChanged(nameof(StartTimeText));
+                OnPropertyChanged(nameof(StartDateText));
+            }
+            finally
+            {
+                _isUpdatingFromDateTime = false;
+            }
+            return;
+        }
+
+        // Try to parse as 12-hour time format
+        if (DateTime.TryParseExact(_startDateTimeText, "h:mm tt", null, System.Globalization.DateTimeStyles.None, out timeOnly))
+        {
+            _isUpdatingFromDateTime = true;
+            try
+            {
+                StartTime = SelectedDate.Date.Add(timeOnly.TimeOfDay);
+                _startTimeText = timeOnly.ToString("HH:mm");
+                _startDateText = SelectedDate.ToString("dd/MM/yyyy");
+                OnPropertyChanged(nameof(StartTimeText));
+                OnPropertyChanged(nameof(StartDateText));
+            }
+            finally
+            {
+                _isUpdatingFromDateTime = false;
+            }
+            return;
+        }
+
+        // Try generic parse
+        if (DateTime.TryParse(_startDateTimeText, out var parsed))
+        {
+            _isUpdatingFromDateTime = true;
+            try
+            {
+                SelectedDate = parsed.Date;
+                StartTime = parsed;
+                _startDateText = parsed.ToString("dd/MM/yyyy");
+                _startTimeText = parsed.ToString("HH:mm");
+                OnPropertyChanged(nameof(StartDateText));
+                OnPropertyChanged(nameof(StartTimeText));
+            }
+            finally
+            {
+                _isUpdatingFromDateTime = false;
             }
         }
     }
@@ -210,6 +352,7 @@ public partial class MainViewModel : ObservableObject
         // Initialize text fields
         _startDateText = SelectedDate.ToString("dd/MM/yyyy");
         _startTimeText = StartTime.Value.ToString("HH:mm");
+        UpdateStartDateTimeText();
     }
 
     public RelayCommand CalculateCommand { get; }
@@ -236,6 +379,7 @@ public partial class MainViewModel : ObservableObject
         {
             _startDateText = value.ToString("dd/MM/yyyy");
             OnPropertyChanged(nameof(StartDateText));
+            UpdateStartDateTimeText();
         }
         
         CalculateCommand.NotifyCanExecuteChanged();
@@ -250,6 +394,7 @@ public partial class MainViewModel : ObservableObject
         {
             _startTimeText = value.Value.ToString("HH:mm");
             OnPropertyChanged(nameof(StartTimeText));
+            UpdateStartDateTimeText();
         }
         
         CalculateCommand.NotifyCanExecuteChanged();

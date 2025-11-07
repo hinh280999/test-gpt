@@ -33,7 +33,8 @@ public partial class MainWindow : Window
     {
         if (DataContext is MainViewModel vm)
         {
-            vm.StartDateText = DateTime.Today.ToString("dd/MM/yyyy");
+            var today = DateTime.Today.AddHours(8);
+            vm.StartDateTimeText = today.ToString("h:mm tt");
         }
     }
 
@@ -41,9 +42,16 @@ public partial class MainWindow : Window
     {
         if (DataContext is MainViewModel vm)
         {
-            vm.StartDateText = DateTime.Today.ToString("dd/MM/yyyy");
-            vm.StartTimeText = DateTime.Now.ToString("HH:mm");
+            var now = DateTime.Now;
+            vm.StartDateTimeText = now.ToString("h:mm tt");
         }
+    }
+
+    private void SetCustom_Click(object sender, RoutedEventArgs e)
+    {
+        // Focus on the textbox so user can type custom time
+        StartTimeTextBox?.Focus();
+        StartTimeTextBox?.SelectAll();
     }
 
     private void AddEntry_Click(object sender, RoutedEventArgs e)
