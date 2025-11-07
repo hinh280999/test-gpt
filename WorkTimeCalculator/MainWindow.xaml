@@ -1,0 +1,194 @@
+<materialDesign:DialogHost x:Class="WorkTimeCalculator.MainWindow"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                           xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+                           xmlns:local="clr-namespace:WorkTimeCalculator"
+                           xmlns:viewModels="clr-namespace:WorkTimeCalculator.ViewModels"
+                           xmlns:views="clr-namespace:WorkTimeCalculator.Views"
+                           mc:Ignorable="d"
+                           Background="{StaticResource AppBackgroundBrush}"
+                           IsOpen="{Binding IsSettingsOpen}"
+                           d:DataContext="{d:DesignInstance Type=viewModels:MainViewModel}">
+    <materialDesign:DialogHost.DataContext>
+        <viewModels:MainViewModel />
+    </materialDesign:DialogHost.DataContext>
+
+    <materialDesign:DialogHost.InputBindings>
+        <!-- Keyboard shortcut for calculate -->
+        <KeyBinding Key="Enter"
+                    Command="{Binding CalculateCommand}" />
+        <KeyBinding Modifiers="Control" Key="L"
+                    Command="{Binding LogEntryCommand}" />
+        <KeyBinding Modifiers="Control" Key="E"
+                    Command="{Binding ExportCommand}" />
+    </materialDesign:DialogHost.InputBindings>
+
+    <materialDesign:DialogHost.DialogContent>
+        <views:SettingsDialog DataContext="{Binding Settings}" />
+    </materialDesign:DialogHost.DialogContent>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top bar -->
+        <DockPanel Grid.Row="0" Margin="0 0 0 24">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" materialDesign:StackPanelAssist.Spacing="12">
+                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Command="{Binding OpenSettingsCommand}">
+                    <StackPanel Orientation="Horizontal" materialDesign:StackPanelAssist.Spacing="8">
+                        <materialDesign:PackIcon Kind="Cog" />
+                        <TextBlock Text="Settings" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Command="{Binding ExportCommand}" ToolTip="Export history to CSV (Ctrl+E)">
+                    <StackPanel Orientation="Horizontal" materialDesign:StackPanelAssist.Spacing="8">
+                        <materialDesign:PackIcon Kind="FileExport" />
+                        <TextBlock Text="Export" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" materialDesign:StackPanelAssist.Spacing="12">
+                <materialDesign:PackIcon Kind="ClockOutline" Width="32" Height="32"
+                                         Foreground="{StaticResource AppPrimaryBrush}" />
+                <StackPanel>
+                    <TextBlock Text="Work Time Calculator" Style="{StaticResource HeadlineText}" />
+                    <TextBlock Text="Plan your day and leave right on time" FontSize="14" Foreground="#607D8B" />
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main Content -->
+        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
+            <TabItem Header="Today">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="0 0 0 24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Quick calculate" FontSize="18" FontWeight="SemiBold" />
+                                    <TextBlock Text="Enter your start time to calculate the perfect finish." FontSize="14" Foreground="#607D8B" Margin="0 4 0 12" />
+
+                                    <DatePicker SelectedDate="{Binding SelectedDate, Mode=TwoWay}"
+                                                materialDesign:HintAssist.Hint="Select date" />
+
+                                    <!-- Start time input -->
+                                    <materialDesign:TimePicker SelectedTime="{Binding StartTime, Mode=TwoWay}"
+                                                               materialDesign:HintAssist.Hint="Enter start time (e.g., 8:04 AM)"
+                                                               materialDesign:TimePickerAssist.AutoCloseClock="True"
+                                                               materialDesign:TimePickerAssist.Is24Hours="False"
+                                                               materialDesign:TimePickerAssist.SelectOnFocus="True" />
+
+                                    <Button Content="Calculate" Style="{StaticResource PrimaryButtonStyle}"
+                                            Command="{Binding CalculateCommand}" ToolTip="Calculate end time (Enter)">
+                                        <Button.CommandParameter>
+                                            <Binding Path="StartTime" />
+                                        </Button.CommandParameter>
+                                    </Button>
+
+                                    <Border Background="#E8F5E9" CornerRadius="8" Padding="16" Margin="0 20 0 0">
+                                        <StackPanel>
+                                            <TextBlock Text="Recommended End Time" FontSize="16" FontWeight="SemiBold" Foreground="#2E7D32" />
+                                            <TextBlock Text="{Binding RecommendedEndTimeDisplay}" FontSize="32" FontWeight="Bold" Foreground="#2E7D32" />
+                                            <TextBlock Text="{Binding RecommendationDetails}" FontSize="14" Foreground="#4CAF50" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Actual end input for logging -->
+                                    <StackPanel Orientation="Vertical" Margin="0 20 0 0">
+                                        <TextBlock Text="Log today's work" FontSize="16" FontWeight="SemiBold" />
+                                        <materialDesign:TimePicker SelectedTime="{Binding ActualEndTime, Mode=TwoWay}"
+                                                                   materialDesign:HintAssist.Hint="Actual end time"
+                                                                   materialDesign:TimePickerAssist.Is24Hours="False" />
+                                        <Button Content="Log Entry" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                Command="{Binding LogEntryCommand}" ToolTip="Add to history (Ctrl+L)" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Summary cards -->
+                        <StackPanel Grid.Column="1" Margin="24 0 0 0">
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Summary" FontSize="16" FontWeight="SemiBold" />
+                                    <StackPanel Orientation="Vertical" Margin="0 12 0 0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
+                                materialDesign:StackPanelAssist.Spacing="12">
+                        <TextBlock Text="This Week" FontWeight="SemiBold" Width="120" />
+                        <TextBlock Text="{Binding WeeklySummary}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
+                                materialDesign:StackPanelAssist.Spacing="12">
+                        <TextBlock Text="This Month" FontWeight="SemiBold" Width="120" />
+                        <TextBlock Text="{Binding MonthlySummary}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0 4"
+                                materialDesign:StackPanelAssist.Spacing="12">
+                        <TextBlock Text="Overtime" FontWeight="SemiBold" Width="120" />
+                        <TextBlock Text="{Binding OvertimeSummary}" Foreground="#E65100" />
+                    </StackPanel>
+                </StackPanel>
+                                    <!-- Simple chart placeholder using LiveCharts -->
+                                    <lvc:CartesianChart Series="{Binding WeeklySeries}" Margin="0 16 0 0" Height="180">
+                                        <lvc:CartesianChart.AxisX>
+                                            <lvc:Axis Labels="{Binding WeeklyLabels}" />
+                                        </lvc:CartesianChart.AxisX>
+                                        <lvc:CartesianChart.AxisY>
+                                            <lvc:Axis Labeler="{Binding HoursLabelFormatter}" />
+                                        </lvc:CartesianChart.AxisY>
+                                    </lvc:CartesianChart>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Background="#E3F2FD">
+                                <StackPanel>
+                                    <TextBlock Text="Next reminder" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding NextNotificationDisplay}" FontSize="14" />
+                                    <ProgressBar Value="{Binding ReminderProgress}" Height="6" Margin="0 12 0 0" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="History">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Margin="0 0 0 12"
+                                materialDesign:StackPanelAssist.Spacing="12">
+                        <TextBox Width="220" Text="{Binding HistoryFilter, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.Hint="Search history" />
+                        <Button Content="Refresh" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding RefreshHistoryCommand}" />
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding FilteredHistory}" AutoGenerateColumns="False" HeadersVisibility="Column"
+                              IsReadOnly="True" Margin="0 0 0 12" RowHeight="36" materialDesign:DataGridAssist.CellPadding="12"
+                              materialDesign:DataGridAssist.ColumnHeaderPadding="16" CanUserSortColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" />
+                            <DataGridTextColumn Header="Start" Binding="{Binding StartTime, StringFormat=t}" />
+                            <DataGridTextColumn Header="Calculated End" Binding="{Binding CalculatedEndTime, StringFormat=t}" />
+                            <DataGridTextColumn Header="Actual End" Binding="{Binding ActualEndTime, StringFormat=t}" />
+                            <DataGridTextColumn Header="Total Hours" Binding="{Binding TotalHours, StringFormat=\{0:F2\}}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</materialDesign:DialogHost>
