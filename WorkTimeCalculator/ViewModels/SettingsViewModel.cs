@@ -1,67 +1,100 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WorkTimeCalculator.Models;
+using WorkTimeCalculator.Services;
 
 namespace WorkTimeCalculator.ViewModels;
 
-public partial class SettingsViewModel : ObservableObject
+public partial class SettingsViewModel : BaseViewModel
 {
-    private readonly Action<LunchSettings> _saveCallback;
-    private readonly Action _cancelCallback;
+    private readonly INotificationService _notificationService;
+    private readonly IExportService _exportService;
+    private readonly IDataService _dataService;
 
     [ObservableProperty]
-    private DateTime? _lunchStart;
+    private ApplicationSettings _settings = new();
 
     [ObservableProperty]
-    private DateTime? _lunchEnd;
+    private bool _isBusy;
 
     [ObservableProperty]
-    private bool _isDarkTheme;
+    private string? _statusMessage;
 
-    [ObservableProperty]
-    private string _validationMessage = string.Empty;
-
-    public SettingsViewModel(LunchSettings source, Action<LunchSettings> saveCallback, Action cancelCallback)
+    public SettingsViewModel(INotificationService notificationService, IExportService exportService, IDataService dataService)
     {
-        _saveCallback = saveCallback;
-        _cancelCallback = cancelCallback;
-        SetSource(source);
+        _notificationService = notificationService;
+        _exportService = exportService;
+        _dataService = dataService;
 
-        SaveCommand = new RelayCommand(Save);
-        CancelCommand = new RelayCommand(Cancel);
+        SaveCommand = new AsyncRelayCommand(SaveAsync);
+        ExportAllCommand = new AsyncRelayCommand(ExportAllAsync);
+        ClearHistoryCommand = new AsyncRelayCommand(ClearHistoryAsync);
     }
 
-    public RelayCommand SaveCommand { get; }
-    public RelayCommand CancelCommand { get; }
+    public IAsyncRelayCommand SaveCommand { get; }
+    public IAsyncRelayCommand ExportAllCommand { get; }
+    public IAsyncRelayCommand ClearHistoryCommand { get; }
 
-    public void SetSource(LunchSettings source)
+    private async Task SaveAsync()
     {
-        LunchStart = DateTime.Today.Add(source.Start);
-        LunchEnd = DateTime.Today.Add(source.End);
-    }
-
-    private void Save()
-    {
-        if (!LunchStart.HasValue || !LunchEnd.HasValue)
+        IsBusy = true;
+        try
         {
-            ValidationMessage = "Please provide both lunch start and end.";
-            return;
-        }
+            ValidateSettings();
+            if (Settings.EnableNotifications)
+            {
+                await _notificationService.CancelAllAsync();
+            }
 
-        if (LunchEnd <= LunchStart)
+            StatusMessage = "Settings saved";
+        }
+        catch (ValidationException ex)
         {
-            ValidationMessage = "Lunch end must be after lunch start.";
-            return;
+            StatusMessage = ex.Message;
         }
-
-        ValidationMessage = string.Empty;
-        _saveCallback(new LunchSettings(LunchStart.Value.TimeOfDay, LunchEnd.Value.TimeOfDay));
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
-    private void Cancel()
+    private async Task ExportAllAsync()
     {
-        ValidationMessage = string.Empty;
-        _cancelCallback();
+        IsBusy = true;
+        try
+        {
+            var entries = await _dataService.GetRecentEntriesAsync(365);
+            var path = await _exportService.ExportAsync(entries, Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+            StatusMessage = $"Data exported to {path}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task ClearHistoryAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            var entries = await _dataService.GetRecentEntriesAsync(3650);
+            await _dataService.DeleteEntriesAsync(entries.Select(e => e.Id));
+            StatusMessage = "History cleared";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void ValidateSettings()
+    {
+        var context = new ValidationContext(Settings);
+        Validator.ValidateObject(Settings, context, validateAllProperties: true);
     }
 }

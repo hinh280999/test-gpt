@@ -1,0 +1,150 @@
+<UserControl x:Class="WorkTimeCalculator.Views.HistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignWidth="1100"
+             d:DesignHeight="720">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0 0 0 16">
+            <Button Content="Prev" Command="{Binding PreviousMonthCommand}" Style="{StaticResource OutlinedButtonStyle}" />
+            <TextBlock Text="{Binding DisplayMonth, StringFormat='{}{0:MMMM yyyy}'}" Style="{StaticResource Headline2Text}" Margin="16 0" VerticalAlignment="Center" />
+            <Button Content="Next" Command="{Binding NextMonthCommand}" Style="{StaticResource OutlinedButtonStyle}" />
+            <StackPanel Orientation="Horizontal" Margin="32 0 0 0">
+                <DatePicker SelectedDate="{Binding RangeStart}" Width="160" />
+                <TextBlock Text="to" VerticalAlignment="Center" Margin="8 0" />
+                <DatePicker SelectedDate="{Binding RangeEnd}" Width="160" />
+            </StackPanel>
+            <ComboBox Width="160"
+                      Margin="16 0 0 0"
+                      ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding SelectedCategory}" />
+            <CheckBox Content="Overtime only"
+                      Margin="16 0 0 0"
+                      IsChecked="{Binding OvertimeOnly}" />
+            <Button Content="Refresh" Command="{Binding RefreshCommand}" Style="{StaticResource OutlinedButtonStyle}" Margin="16 0 0 0" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Calendar" Style="{StaticResource SectionTitleText}" />
+                    <ItemsControl ItemsSource="{Binding CalendarDays}" Margin="0 16 0 0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="7" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="4" Padding="8" CornerRadius="12" BorderThickness="1">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource NeutralMidBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsWeekend}" Value="True">
+                                                    <Setter Property="Opacity" Value="0.7" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                                                    <Setter Property="BorderThickness" Value="2" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsOvertime}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource WarningBrush}" />
+                                                    <Setter Property="Opacity" Value="0.85" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Date.Day}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding TotalHours, StringFormat='{}{0:F1}h'}" Style="{StaticResource CaptionText}" />
+                                        <TextBlock Text="OT" Foreground="{StaticResource DangerBrush}" Visibility="{Binding IsOvertime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource CardStyle}" Margin="16 0 0 0">
+                <StackPanel>
+                    <TextBlock Text="Trend" Style="{StaticResource SectionTitleText}" />
+                    <ItemsControl ItemsSource="{Binding WeeklyTrend}" Margin="0 16 0 0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="24" Margin="4" Background="{StaticResource PrimaryLightBrush}" CornerRadius="4">
+                                    <Border Height="{Binding}" Background="{StaticResource PrimaryBrush}" VerticalAlignment="Bottom" CornerRadius="4" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="Category distribution" Style="{StaticResource SectionTitleText}" Margin="0 16 0 8" />
+                    <ItemsControl ItemsSource="{Binding CategoryDistribution}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0 4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Category}" />
+                                    <ProgressBar Grid.Column="1" Value="{Binding Hours}" Maximum="60" Height="6" Margin="12 8" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Hours, StringFormat='{}{0:F1}h'}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource CardStyle}" Margin="0 16 0 0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Export selected" Command="{Binding ExportSelectedCommand}" Style="{StaticResource OutlinedButtonStyle}" />
+                        <Button Content="Delete selected" Command="{Binding DeleteSelectedCommand}" Style="{StaticResource OutlinedButtonStyle}" Margin="12 0 0 0" />
+                    </StackPanel>
+                    <DataGrid ItemsSource="{Binding Entries}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Extended"
+                              Margin="0 12 0 0">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Binding="{Binding IsSelected, Mode=TwoWay}" Width="50" />
+                            <DataGridTextColumn Header="Date" Binding="{Binding DateDisplay}" />
+                            <DataGridTextColumn Header="Start" Binding="{Binding StartDisplay}" />
+                            <DataGridTextColumn Header="End" Binding="{Binding EndDisplay}" />
+                            <DataGridTextColumn Header="Break" Binding="{Binding BreakDisplay}" />
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalDisplay}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource CaptionText}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

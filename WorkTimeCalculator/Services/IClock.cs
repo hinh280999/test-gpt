@@ -1,0 +1,13 @@
+using System;
+
+namespace WorkTimeCalculator.Services;
+
+public interface IClock
+{
+    DateTime Now { get; }
+}
+
+public sealed class SystemClock : IClock
+{
+    public DateTime Now => DateTime.Now;
+}

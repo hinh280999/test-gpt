@@ -1,0 +1,81 @@
+<UserControl x:Class="WorkTimeCalculator.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignWidth="1100"
+             d:DesignHeight="720">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" Orientation="Vertical">
+            <Border Style="{StaticResource CardStyle}" Margin="0 0 0 16">
+                <StackPanel>
+                    <TextBlock Text="Work schedule" Style="{StaticResource SectionTitleText}" />
+                    <UniformGrid Columns="2" Margin="0 16 0 0" Rows="2">
+                        <StackPanel>
+                            <TextBlock Text="Standard hours per day" Style="{StaticResource CaptionText}" />
+                            <TextBox Width="140" Text="{Binding Settings.StandardHoursPerDay}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Work days per week" Style="{StaticResource CaptionText}" />
+                            <TextBox Width="140" Text="{Binding Settings.WorkDaysPerWeek}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Default start" Style="{StaticResource CaptionText}" />
+                            <TextBox Width="140" Text="{Binding Settings.DefaultStartTime}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Default lunch" Style="{StaticResource CaptionText}" />
+                            <TextBox Width="140" Text="{Binding Settings.DefaultBreakDuration}" />
+                        </StackPanel>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0 0 0 16">
+                <StackPanel>
+                    <TextBlock Text="Notifications" Style="{StaticResource SectionTitleText}" />
+                    <CheckBox Content="Enable reminders" IsChecked="{Binding Settings.EnableNotifications}" />
+                    <CheckBox Content="Desktop notifications" IsChecked="{Binding Settings.DesktopNotifications}" />
+                    <CheckBox Content="Sound alerts" IsChecked="{Binding Settings.SoundAlerts}" />
+                    <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
+                        <TextBlock Text="Lead time (minutes)" VerticalAlignment="Center" />
+                        <TextBox Width="120" Margin="12 0 0 0" Text="{Binding Settings.ReminderLeadTime}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Appearance" Style="{StaticResource SectionTitleText}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Theme" VerticalAlignment="Center" />
+                        <ComboBox Width="160" Margin="12 0 0 0" SelectedValue="{Binding Settings.Theme}">
+                            <ComboBoxItem Content="Light" />
+                            <ComboBoxItem Content="Dark" />
+                            <ComboBoxItem Content="Auto" />
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
+                        <TextBlock Text="Accent" VerticalAlignment="Center" />
+                        <TextBox Width="120" Margin="12 0 0 0" Text="{Binding Settings.AccentColor}" />
+                        <TextBlock Text="Font scale" VerticalAlignment="Center" Margin="24 0 0 0" />
+                        <Slider Width="160" Minimum="0.8" Maximum="1.5" Value="{Binding Settings.FontScale}" TickFrequency="0.1" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0 0 0 16">
+                <StackPanel>
+                    <TextBlock Text="Data" Style="{StaticResource SectionTitleText}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Save settings" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" />
+                        <Button Content="Export all" Command="{Binding ExportAllCommand}" Style="{StaticResource OutlinedButtonStyle}" Margin="12 0 0 0" />
+                        <Button Content="Clear history" Command="{Binding ClearHistoryCommand}" Style="{StaticResource OutlinedButtonStyle}" Margin="12 0 0 0" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource CaptionText}" Margin="0 12 0 0" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
